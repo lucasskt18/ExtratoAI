@@ -32,8 +32,11 @@ def test_parse_inter_transactions():
     text = (FIXTURES / "inter_sample.txt").read_text(encoding="utf-8")
     result = parse_inter(text)
     assert result.bank == "inter"
-    assert len(result.transactions) >= 6
+    assert len(result.transactions) >= 7
+    assert any(t.installment == "1/3" for t in result.transactions)
+    assert any(t.amount < 0 for t in result.transactions)  # pagamento
     assert not any("pagamento efetuado" in t.description.lower() for t in result.transactions)
+    assert result.total_amount == 890.25
 
 
 def test_parse_statement_text_routes():

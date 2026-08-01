@@ -9,8 +9,10 @@ backend/*.egg-info/
 backend/data/*.db
 backend/data/inbox/*.pdf
 backend/data/processed/*.pdf
+backend/data/uploads/*
 !backend/data/inbox/.gitkeep
 !backend/data/processed/.gitkeep
+!backend/data/uploads/.gitkeep
 
 # Node
 frontend/node_modules/

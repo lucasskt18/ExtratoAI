@@ -24,6 +24,11 @@ class Settings(BaseSettings):
         return self.data_dir / "processed"
 
     @property
+    def uploads_dir(self) -> Path:
+        """UI uploads land here to avoid racing with the inbox watcher."""
+        return self.data_dir / "uploads"
+
+    @property
     def db_path(self) -> Path:
         return self.data_dir / "extratoai.db"
 

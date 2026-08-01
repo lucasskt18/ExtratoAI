@@ -11,6 +11,7 @@ from watchdog.observers import Observer
 
 from app.config import settings
 from app.db.session import SessionLocal
+from app.services.pdf import InvalidPdfError, find_pdf_offset
 from app.services.pipeline import DuplicateStatementError, process_pdf
 
 logger = logging.getLogger(__name__)
@@ -19,25 +20,58 @@ logger = logging.getLogger(__name__)
 class PdfInboxHandler(FileSystemEventHandler):
     def __init__(self) -> None:
         self._pending: Dict[str, float] = {}
+        self._sizes: Dict[str, int] = {}
         self._lock = threading.Lock()
 
     def on_created(self, event) -> None:  # type: ignore[no-untyped-def]
+        self._track(event)
+
+    def on_modified(self, event) -> None:  # type: ignore[no-untyped-def]
+        self._track(event)
+
+    def _track(self, event) -> None:  # type: ignore[no-untyped-def]
         if event.is_directory:
             return
         path = Path(event.src_path)
-        if path.suffix.lower() != ".pdf":
+        if path.suffix.lower() != ".pdf" or path.name.startswith("."):
             return
         with self._lock:
             self._pending[str(path)] = time.time()
 
-    def drain_ready(self, settle_seconds: float = 1.0) -> List[Path]:
+    def drain_ready(self, settle_seconds: float = 1.5) -> List[Path]:
         now = time.time()
         ready: List[Path] = []
         with self._lock:
             for key, ts in list(self._pending.items()):
-                if now - ts >= settle_seconds:
-                    ready.append(Path(key))
-                    del self._pending[key]
+                path = Path(key)
+                if now - ts < settle_seconds:
+                    continue
+                if not path.exists():
+                    self._pending.pop(key, None)
+                    self._sizes.pop(key, None)
+                    continue
+                try:
+                    size = path.stat().st_size
+                except OSError:
+                    continue
+
+                previous = self._sizes.get(key)
+                self._sizes[key] = size
+                # Size still changing — copy/download in progress
+                if previous is None or previous != size or size < 8:
+                    self._pending[key] = now
+                    continue
+
+                data = path.read_bytes()
+                if find_pdf_offset(data) < 0:
+                    logger.warning("Skipping non-PDF in inbox: %s", path.name)
+                    self._pending.pop(key, None)
+                    self._sizes.pop(key, None)
+                    continue
+
+                ready.append(path)
+                self._pending.pop(key, None)
+                self._sizes.pop(key, None)
         return ready
 
 
@@ -71,6 +105,8 @@ class InboxWatcher:
                         process_pdf(db, path)
                     except DuplicateStatementError:
                         logger.info("Duplicate skipped: %s", path.name)
+                    except InvalidPdfError as exc:
+                        logger.warning("Invalid PDF in inbox: %s", exc)
                     except Exception:
                         logger.exception("Watcher failed on %s", path)
             self._stop.wait(0.5)

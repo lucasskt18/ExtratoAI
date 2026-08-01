@@ -1,14 +1,15 @@
 Banco Inter
 Inter Medium
-Fatura Cartão de Crédito
-Período 01/02/2026 até 28/02/2026
-Total da fatura R$ 890,25
+Olá, Lucas! A sua fatura chegou!
+Fatura atual R$ 890,25
+Data de Vencimento 28/02/2026
 
-01/02/2026 Rappi *Rappi Brasil 45,90
-03/02/2026 UBER *TRIP 32,10
-07/02/2026 Disney Plus 27,90
-11/02/2026 Magalu Loja Online 250,00
-14/02/2026 Pagamento efetuado -400,00
-18/02/2026 Clínica Odontológica 180,00
-21/02/2026 Posto Ipiranga 120,35
-25/02/2026 Coursera Inc 59,00
+01 de fev. 2026 Rappi *Rappi Brasil - R$ 45,90
+03 de fev. 2026 UBER *TRIP - R$ 32,10
+07 de fev. 2026 Disney Plus - R$ 27,90
+11 de fev. 2026 Magalu Loja Online - R$ 250,00
+14 de fev. 2026 PAGAMENTO ON LINE - + R$ 400,00
+18 de fev. 2026 Clínica Odontológica - R$ 180,00
+21 de fev. 2026 Posto Ipiranga - R$ 120,35
+25 de fev. 2026 Coursera Inc - R$ 59,00
+11 de fev. 2026 AVIATOR (Parcela 01 de 03) - R$ 100,00

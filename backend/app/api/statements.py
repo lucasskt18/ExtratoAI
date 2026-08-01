@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import shutil
+import uuid
 from pathlib import Path
 from typing import Dict, List
 
@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.models.statement import Statement
 from app.models.transaction import Transaction
 from app.schemas import InboxStatus, StatementDetail, StatementOut, UploadResult
+from app.services.pdf import InvalidPdfError, find_pdf_offset
 from app.services.pipeline import DuplicateStatementError, process_inbox, process_pdf
 
 router = APIRouter()
@@ -69,22 +70,30 @@ async def upload_statement(
     db: Session = Depends(get_db),
 ) -> UploadResult:
     if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
+        raise HTTPException(status_code=400, detail="Envie um arquivo .pdf")
 
-    settings.inbox_dir.mkdir(parents=True, exist_ok=True)
-    dest = settings.inbox_dir / Path(file.filename).name
-    if dest.exists():
-        stem, suffix = dest.stem, dest.suffix
-        i = 1
-        while dest.exists():
-            dest = settings.inbox_dir / f"{stem}_{i}{suffix}"
-            i += 1
+    settings.uploads_dir.mkdir(parents=True, exist_ok=True)
+    original = Path(file.filename).name
+    # Write outside inbox so the watcher never races with the HTTP upload.
+    dest = settings.uploads_dir / f"{uuid.uuid4().hex}_{original}"
 
-    with dest.open("wb") as out:
-        shutil.copyfileobj(file.file, out)
+    raw = await file.read()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Arquivo vazio")
+
+    offset = find_pdf_offset(raw)
+    if offset < 0:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"'{original}' não parece um PDF válido. "
+                "Baixe novamente a fatura no app do banco."
+            ),
+        )
+    dest.write_bytes(raw[offset:])
 
     try:
-        statement = process_pdf(db, dest)
+        statement = process_pdf(db, dest, source_filename=original)
         message = "Fatura processada com sucesso"
     except DuplicateStatementError as exc:
         dest.unlink(missing_ok=True)
@@ -92,6 +101,9 @@ async def upload_statement(
             status_code=409,
             detail=f"Esta fatura já foi importada (id={exc.statement_id})",
         ) from exc
+    except InvalidPdfError as exc:
+        dest.unlink(missing_ok=True)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 

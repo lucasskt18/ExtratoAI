@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import shutil
 from pathlib import Path
+from typing import List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -12,7 +13,12 @@ from app.models.statement import Statement
 from app.models.transaction import Transaction
 from app.parsers import parse_statement_text
 from app.services.categorize import categorize_description
-from app.services.pdf import extract_text_from_pdf, file_sha256, transaction_fingerprint
+from app.services.pdf import (
+    InvalidPdfError,
+    extract_text_from_pdf,
+    file_sha256,
+    transaction_fingerprint,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,20 +29,33 @@ class DuplicateStatementError(Exception):
         super().__init__(f"Statement already processed: {statement_id}")
 
 
-def process_pdf(db: Session, path: Path, move_to_processed: bool = True) -> Statement:
+def process_pdf(
+    db: Session,
+    path: Path,
+    move_to_processed: bool = True,
+    source_filename: Optional[str] = None,
+) -> Statement:
     if not path.exists() or path.suffix.lower() != ".pdf":
         raise ValueError(f"Invalid PDF path: {path}")
+
+    display_name = source_filename or path.name
+
+    try:
+        text = extract_text_from_pdf(path)
+    except InvalidPdfError:
+        raise
+    except Exception as exc:
+        raise InvalidPdfError(str(exc)) from exc
 
     file_hash = file_sha256(path)
     existing = db.scalar(select(Statement).where(Statement.file_hash == file_hash))
     if existing:
         raise DuplicateStatementError(existing.id)
 
-    text = extract_text_from_pdf(path)
     if not text:
         statement = Statement(
             bank="unknown",
-            source_filename=path.name,
+            source_filename=display_name,
             file_hash=file_hash,
             status="needs_review",
             raw_text_preview="",
@@ -55,9 +74,11 @@ def process_pdf(db: Session, path: Path, move_to_processed: bool = True) -> Stat
         period_start=parsed.period_start,
         period_end=parsed.period_end,
         total_amount=parsed.total_amount,
-        source_filename=path.name,
+        source_filename=display_name,
         file_hash=file_hash,
-        status="needs_review" if parsed.confidence < 0.5 or not parsed.transactions else "processed",
+        status="needs_review"
+        if parsed.confidence < 0.5 or not parsed.transactions
+        else "processed",
         raw_text_preview=text[:2000],
     )
     db.add(statement)
@@ -80,14 +101,16 @@ def process_pdf(db: Session, path: Path, move_to_processed: bool = True) -> Stat
         )
 
     if not statement.total_amount and parsed.transactions:
-        statement.total_amount = sum(t.amount for t in parsed.transactions if t.amount > 0)
+        statement.total_amount = sum(
+            t.amount for t in parsed.transactions if t.amount > 0
+        )
 
     db.commit()
     db.refresh(statement)
     _maybe_move(path, move_to_processed)
     logger.info(
         "Processed %s as %s with %d transactions",
-        path.name,
+        display_name,
         statement.bank,
         len(parsed.transactions),
     )
@@ -108,14 +131,16 @@ def _maybe_move(path: Path, move_to_processed: bool) -> None:
     shutil.move(str(path), str(dest))
 
 
-def process_inbox(db: Session) -> list[Statement]:
+def process_inbox(db: Session) -> List[Statement]:
     settings.inbox_dir.mkdir(parents=True, exist_ok=True)
-    results: list[Statement] = []
+    results: List[Statement] = []
     for path in sorted(settings.inbox_dir.glob("*.pdf")):
         try:
             results.append(process_pdf(db, path))
         except DuplicateStatementError:
             _maybe_move(path, True)
+        except InvalidPdfError as exc:
+            logger.warning("Invalid PDF skipped: %s", exc)
         except Exception:
             logger.exception("Failed to process %s", path)
     return results

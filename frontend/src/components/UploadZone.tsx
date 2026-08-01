@@ -5,9 +5,10 @@ import { uploadPdf, type InboxStatus } from '../api/client'
 type Props = {
   inbox: InboxStatus | null
   onUploaded: () => void
+  compact?: boolean
 }
 
-export function UploadZone({ inbox, onUploaded }: Props) {
+export function UploadZone({ inbox, onUploaded, compact = false }: Props) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -41,39 +42,54 @@ export function UploadZone({ inbox, onUploaded }: Props) {
   })
 
   return (
-    <section className="animate-fade-up-delay">
+    <div>
       <div
         {...getRootProps()}
         className={[
-          'rounded-2xl border border-dashed px-5 py-7 transition-colors cursor-pointer',
-          isDragActive
-            ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
-            : 'border-[var(--color-line)] bg-[var(--color-panel)]/70 hover:border-[var(--color-accent)]',
-          busy ? 'opacity-70 cursor-wait' : '',
+          'dropzone',
+          isDragActive ? 'is-active' : '',
+          busy ? 'is-busy' : '',
+          compact ? '!py-4 !px-4' : '',
         ].join(' ')}
       >
         <input {...getInputProps()} />
-        <p className="font-[family-name:var(--font-display)] text-xl text-[var(--color-ink)]">
-          {busy ? 'Processando fatura…' : 'Arraste PDFs de fatura aqui'}
-        </p>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">
-          Ou clique para selecionar. Também monitoramos a pasta inbox automaticamente.
-        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[15px] font-extrabold tracking-tight text-[var(--color-brand-ink)]">
+              {busy
+                ? 'Processando fatura…'
+                : isDragActive
+                  ? 'Solte o PDF para importar'
+                  : 'Importar fatura PDF'}
+            </p>
+            <p className="mt-1 text-sm font-medium text-[var(--color-muted)]">
+              Arraste aqui ou clique para escolher. Inbox monitorada automaticamente.
+            </p>
+          </div>
+          <span className="btn btn-primary shrink-0 pointer-events-none">
+            {busy ? 'Aguarde…' : 'Escolher arquivo'}
+          </span>
+        </div>
+
         {inbox && (
-          <p className="mt-3 text-xs text-[var(--color-muted)]">
-            Inbox: <span className="font-medium text-[var(--color-ink)]">{inbox.inbox_dir}</span>
-            {' · '}
-            {inbox.processed_count} faturas importadas
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-teal-200/70 pt-3">
             {inbox.pending_pdfs.length > 0 && (
-              <span className="ml-1 text-[var(--color-warn)] animate-pulse-soft">
-                · {inbox.pending_pdfs.length} pendente(s)
-              </span>
+              <span className="chip chip-warn">{inbox.pending_pdfs.length} pendente(s)</span>
             )}
-          </p>
+            <span
+              className="truncate text-[11px] font-medium text-[var(--color-muted-2)]"
+              title={inbox.inbox_dir}
+            >
+              {inbox.inbox_dir}
+            </span>
+          </div>
         )}
       </div>
-      {message && <p className="mt-2 text-sm text-[var(--color-accent)]">{message}</p>}
-      {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
-    </section>
+
+      {message && (
+        <p className="mt-2 text-sm font-semibold text-[var(--color-success)]">{message}</p>
+      )}
+      {error && <p className="mt-2 text-sm font-semibold text-[var(--color-danger)]">{error}</p>}
+    </div>
   )
 }

@@ -10,21 +10,21 @@ type Props = {
 export function TransactionList({ transactions, categories, onCategoryChange }: Props) {
   if (!transactions.length) {
     return (
-      <p className="py-10 text-center text-sm text-[var(--color-muted)]">
-        Nenhuma transação neste mês. Envie uma fatura PDF para começar.
-      </p>
+      <div className="rounded-2xl bg-[var(--color-bg)] px-4 py-12 text-center text-sm font-medium text-[var(--color-muted)]">
+        Nenhuma transação neste mês. Importe uma fatura PDF para começar.
+      </div>
     )
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] text-left text-sm">
+    <div className="table-wrap">
+      <table className="data">
         <thead>
-          <tr className="border-b border-[var(--color-line)] text-[var(--color-muted)]">
-            <th className="py-2 pr-3 font-medium">Data</th>
-            <th className="py-2 pr-3 font-medium">Descrição</th>
-            <th className="py-2 pr-3 font-medium">Categoria</th>
-            <th className="py-2 text-right font-medium">Valor</th>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th className="!text-right">Valor</th>
           </tr>
         </thead>
         <tbody>
@@ -32,25 +32,21 @@ export function TransactionList({ transactions, categories, onCategoryChange }: 
             const isUncategorized =
               !tx.category || tx.category.name === 'Não categorizado'
             return (
-              <tr
-                key={tx.id}
-                className={[
-                  'border-b border-[var(--color-line)]/70 transition-colors',
-                  isUncategorized ? 'bg-amber-50/60' : 'hover:bg-white/50',
-                ].join(' ')}
-              >
-                <td className="py-3 pr-3 tabular-nums text-[var(--color-muted)]">
+              <tr key={tx.id} className={isUncategorized ? 'is-warn' : undefined}>
+                <td className="whitespace-nowrap text-sm font-semibold tabular-nums text-[var(--color-muted)]">
                   {formatDate(tx.date)}
                 </td>
-                <td className="py-3 pr-3">
-                  <div className="font-medium text-[var(--color-ink)]">{tx.description}</div>
+                <td>
+                  <div className="text-sm font-bold text-[var(--color-ink)]">{tx.description}</div>
                   {tx.installment && (
-                    <div className="text-xs text-[var(--color-muted)]">Parcela {tx.installment}</div>
+                    <div className="mt-0.5 text-xs font-semibold text-[var(--color-muted-2)]">
+                      Parcela {tx.installment}
+                    </div>
                   )}
                 </td>
-                <td className="py-3 pr-3">
+                <td>
                   <select
-                    className="max-w-[180px] rounded-lg border border-[var(--color-line)] bg-[var(--color-panel)] px-2 py-1.5 text-sm outline-none focus:border-[var(--color-accent)]"
+                    className="select"
                     value={tx.category_id ?? ''}
                     onChange={(e) => {
                       const categoryId = Number(e.target.value)
@@ -71,7 +67,7 @@ export function TransactionList({ transactions, categories, onCategoryChange }: 
                     ))}
                   </select>
                 </td>
-                <td className="py-3 text-right font-medium tabular-nums">
+                <td className="text-right text-sm font-extrabold tabular-nums text-[var(--color-ink)]">
                   {formatBRL(tx.amount)}
                 </td>
               </tr>

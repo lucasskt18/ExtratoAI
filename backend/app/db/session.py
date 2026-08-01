@@ -39,6 +39,7 @@ def init_db() -> None:
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     settings.inbox_dir.mkdir(parents=True, exist_ok=True)
     settings.processed_dir.mkdir(parents=True, exist_ok=True)
+    settings.uploads_dir.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         seed.seed_categories(db)
