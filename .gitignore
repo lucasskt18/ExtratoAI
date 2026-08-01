@@ -1,0 +1,23 @@
+# Python
+backend/.venv/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/*.egg-info/
+*.pyc
+
+# Data / local DB
+backend/data/*.db
+backend/data/inbox/*.pdf
+backend/data/processed/*.pdf
+!backend/data/inbox/.gitkeep
+!backend/data/processed/.gitkeep
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Env / OS
+.env
+.env.local
+.DS_Store
+*.log

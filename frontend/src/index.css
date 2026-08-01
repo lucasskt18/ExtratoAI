@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, sans-serif;
+  --color-ink: #1c1915;
+  --color-muted: #5c564c;
+  --color-paper: #f7f3eb;
+  --color-panel: #fffdf8;
+  --color-line: #ddd4c4;
+  --color-accent: #0f6b5c;
+  --color-accent-soft: #d8efe9;
+  --color-warn: #b45309;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #e7f2ee 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #f3e8d8 0%, transparent 50%),
+    linear-gradient(180deg, #fbf8f2 0%, var(--color-paper) 40%, #f0ebe2 100%);
+  background-attachment: fixed;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease-out both;
+}
+
+.animate-fade-up-delay {
+  animation: fade-up 0.65s ease-out 0.08s both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.2s ease-in-out infinite;
+}
