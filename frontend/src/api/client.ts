@@ -27,10 +27,14 @@ export type CategoryBreakdown = {
 export type DashboardSummary = {
   month: string
   total_spent: number
+  charges_total: number
+  invoice_total?: number | null
+  view_mode: 'calendar' | 'billing'
   transaction_count: number
   uncategorized_count: number
   by_category: CategoryBreakdown[]
   recent_transactions: Transaction[]
+  statements: Statement[]
 }
 
 export type Statement = {

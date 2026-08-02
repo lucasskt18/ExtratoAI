@@ -101,8 +101,29 @@ function App() {
         <div className="panel panel-pad">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className="section-label">Resumo do mês</div>
-              <div className="metric">{loading && !summary ? '—' : formatBRL(summary?.total_spent ?? 0)}</div>
+              <div className="section-label">
+                {summary?.view_mode === 'billing' ? 'Total a pagar (fatura)' : 'Resumo do mês'}
+              </div>
+              <div className="metric">
+                {loading && !summary ? '—' : formatBRL(summary?.total_spent ?? 0)}
+              </div>
+              {summary?.view_mode === 'billing' && (
+                <p className="mt-2 text-sm font-medium text-[var(--color-muted)]">
+                  Lançamentos na fatura:{' '}
+                  <span className="font-bold text-[var(--color-ink-2)]">
+                    {formatBRL(summary.charges_total)}
+                  </span>
+                  {summary.statements[0]?.period_end && (
+                    <>
+                      {' '}
+                      · vencimento{' '}
+                      {new Date(summary.statements[0].period_end + 'T12:00:00').toLocaleDateString(
+                        'pt-BR',
+                      )}
+                    </>
+                  )}
+                </p>
+              )}
             </div>
             <button type="button" className="btn btn-ghost" onClick={() => void refresh()}>
               {loading ? 'Atualizando…' : 'Atualizar'}
@@ -117,6 +138,11 @@ function App() {
               <span className="chip">Tudo categorizado</span>
             )}
             {inbox && <span className="chip">{inbox.processed_count} faturas importadas</span>}
+            {summary?.view_mode === 'billing' && summary.statements[0] && (
+              <span className="chip">
+                {summary.statements[0].card_label || summary.statements[0].bank}
+              </span>
+            )}
           </div>
 
           <div className="mt-5">
@@ -127,7 +153,9 @@ function App() {
         <div className="panel panel-pad">
           <div className="section-label">Por categoria</div>
           <p className="mt-1 text-sm font-medium text-[var(--color-muted)]">
-            Distribuição dos gastos no período.
+            {summary?.view_mode === 'billing'
+              ? 'Distribuição dos lançamentos desta fatura.'
+              : 'Distribuição dos gastos no período.'}
           </p>
           <div className="mt-4">
             <CategoryChart data={summary?.by_category ?? []} />
@@ -140,7 +168,9 @@ function App() {
           <div>
             <div className="section-label">Movimentações</div>
             <h2 className="mt-1 text-lg font-extrabold tracking-tight text-[var(--color-ink)]">
-              Transações do mês
+              {summary?.view_mode === 'billing'
+                ? 'Lançamentos da fatura'
+                : 'Transações do mês'}
             </h2>
           </div>
           <p className="text-sm font-medium text-[var(--color-muted)]">

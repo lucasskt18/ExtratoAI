@@ -6,7 +6,7 @@ Aplicação **local** para extrair faturas de cartão (PDF), categorizar gastos 
 
 - **Backend:** Python, FastAPI, SQLite, pdfplumber, watchdog
 - **Frontend:** Vite, React, TypeScript, Tailwind, Recharts
-- **Parsers MVP:** Nubank + Banco Inter (+ fallback genérico)
+- **Parsers MVP:** Nubank + Banco Inter + Itaú (+ fallback genérico)
 - **Export:** CSV
 
 ## Como rodar

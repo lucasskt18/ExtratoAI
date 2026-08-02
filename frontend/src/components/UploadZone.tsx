@@ -25,7 +25,12 @@ export function UploadZone({ inbox, onUploaded }: Props) {
         }
         onUploaded()
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Falha no upload')
+        const raw = err instanceof Error ? err.message : 'Falha no upload'
+        if (raw.toLowerCase().includes('já foi importada')) {
+          setError('Esta fatura já está no ExtratoAI. Não precisa enviar de novo — use Atualizar.')
+        } else {
+          setError(raw)
+        }
       } finally {
         setBusy(false)
       }

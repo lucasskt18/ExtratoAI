@@ -84,10 +84,14 @@ class CategoryBreakdown(BaseModel):
 class DashboardSummary(BaseModel):
     month: str
     total_spent: float
+    charges_total: float = 0.0
+    invoice_total: Optional[float] = None
+    view_mode: str = "calendar"  # calendar | billing
     transaction_count: int
     uncategorized_count: int
     by_category: list[CategoryBreakdown]
     recent_transactions: list[TransactionOut]
+    statements: list[StatementOut] = Field(default_factory=list)
 
 
 class UploadResult(BaseModel):

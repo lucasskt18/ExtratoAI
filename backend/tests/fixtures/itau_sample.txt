@@ -1,0 +1,90 @@
+1
+Gold
+CLIENTEEXEMPLO ResumodafaturaemR$
+RUAEXEMPLO,100
+Totaldafaturaanterior 19,90
+BAIRROEXEMPLO
+00000-000CIDADEEXEMPLORJ P Pagamentosefetuados -118,74
+S Saldofinanciado -98,84
+E Encargos(Financiamento+moratório) 0,59
+Postagem:13/02/2026
+Vencimento:20/02/2026 L Lançamentosatuais 144,46
+Emissão:13/02/2026
+Previsãopróx.Fechamento:13/03/2026 = Totaldestafatura 46,21
+Titular CLIENTEEXEMPLO
+Cartão 0000.XXXX.XXXX.0000
+Ototaldasuafaturaé: Comvencimentoem: Limitetotaldecrédito:
+R$ 46,21 20/02/2026 R$990,00
+Preparamosoutraopçãodepagamentoabaixo,válidaatéadatadevencimento:
+Pagamentomínimo: Parcelasfixas:
+R$2,80
+Valoremreais %dototalfinanciado
+Valortotalfinanciado R$43,41 100,00% Consulteasopçõesdeparcelamentono
+Encargos R$7,38 - appounacentraldeatendimento.
+IOF R$0,26 -
+Totalapagar R$51,05 -
+Juros:15,87%am-215,00%aa CET:17,63%am-620,76%aa
+00000000000
+Casodesejerealizaralgumpagamento,vocêpodeconsultarosaldoatualizado
+noAppnarota>FaturaouviaCanaisdeatendimentoegeraroboletonovalordesejado.
+Casovocêpagueumvalorentreomínimoeototaldesuafatura,osaldorestanteserácobradonapróximafaturacomjuroseimpostos.O
+pagamentodovalortotalésempreamelhoropçãoporquenãohácobrançasdejuros.
+Opagamentoobrigatórioécompostopelosaldodocréditorotativoerespectivosencargosincidentesnoperíodo(R$0,59),prestaçõesreferentes
+aparcelamentosdosaldodevedordeperíodosanteriores(R$0,00)evalormínimodenovastransações(R$2,21).Paraentendermaissobreo
+pagamentoobrigatórioeopagamentomínimo,acesseseucontratoeaabaServiçosnositeItaúCartões.
+Previsãoparaopróximofechamento:13/03/2026.
+Pagamentos efetuados Limites de crédito Valor em R$
+DATA VALOREMR$ Limitetotaldecrédito 990,00
+21/01 Pagamentoviaconta -19,90 Limitedisponível 943,79
+08/02 Pagamentoviaconta -98,84 Limitetotalutilizado 46,21
+P Totaldospagamentos -118,74
+Essessãoosseuslimitesnadatadefechamentodessafatura.
+Lançamentos:compras esaques Casoqueiraconsultarinformaçõesatualizadassobreoseu
+limite,consultenossoscanais.
+CLIENTEEXEMPLO
+.
+DATA ESTABELECIMENTO VALOREMR$
+20/01 PadariaESAOJOAODEMBR 16,50 Enca rgoscobradosnesta fatura
+supermercadoSAOJOAODEM
+Jurosdorotativo 17,00% 0,10
+21/01 IFD*MONICACRISTINADES 30,98
+supermercadoSAOJOAODEM Jurosdemora 1,00%am 0,01
+26/01 DROGARIASOCIALJDLTDS 13,99 Multaporatraso 2,00% 0,40
+saúdeSAOJOAODEM IOFdefinanciamento (0,38%+0,00820%a.d.) 0,08
+29/01 DROGARIASOCIALJDLTDS 11,49 E TotaldeencargosemR$ 0,59
+saúdeSAOJOAODEM
+02/02 PadariaESAOJOAODEMBR 12,90
+supermercadoSAOJOAODEM Novotetodejurosdocartãodecrédito
+03/02 PadariaESAOJOAODEMBR 12,90
+ValoremR$
+supermercadoSAOJOAODEM
+09/02 PadariaESAOJOAODEMBR 12,90 CreditoRotativo/Atraso
+supermercadoSAOJOAODEM Limitemáximodejuros 0,00
+11/02 APPLECOMBILLSAOPAULOBR 19,90
+Juroseencargosfinanceirosatéomomento 0,00
+outrosSAOPAULO
+%sobreolimitemáximodejuros 0,00%
+11/02 PadariaESAOJOAODEMBR 12,90
+supermercadoSAOJOAODEM
+01/02 IOF 0,08
+Osjuroseencargosquevocêirápagarsãoosapresentadosna
+contratação,ecasoultrapassemolimitemáximo,adiferençanão
+13/02 ENCARGOSREFINANCIAMENT 0,10
+serácobradaouserádevolvidaemfatura.Válidoporcadaoperação
+deparcelamentoourotativo.
+13/02 JUROSDEMORA 0,01
+Fiqueatentoaosencargosparaopróximo
+13/02 MULTA 0,40
+período (20/02a19/03)
+Lançamentosnocartão 144,46
+JurosMáximosdocontrato 15,87%am 215,00%aa
+L Totaldoslançamentosatuais 144,46
+00000000
+08000000000
+1
+SimulaçãodeCompras parc.c/ jurose
+Crediário (próximoperíodo)
+Limitedecrédito 990,00
+Jurosdacompraparcelada 5,99% am 82,88%aa
+Aocontrataresseproduto,vocêdeclaraqueopagamentodos
+valoresdevidosnãocomprometesuarendamínimaexistencial.

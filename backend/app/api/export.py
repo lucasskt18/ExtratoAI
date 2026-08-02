@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
+from app.models.statement import Statement
 from app.models.transaction import Transaction
 from app.services.dates import InvalidMonthFormatError, month_bounds
 
@@ -32,7 +33,18 @@ def export_csv(
             start, end = month_bounds(month)
         except InvalidMonthFormatError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        query = query.where(Transaction.date >= start, Transaction.date < end)
+
+        billing_ids = list(
+            db.scalars(
+                select(Statement.id)
+                .where(Statement.period_end.is_not(None))
+                .where(Statement.period_end >= start, Statement.period_end < end)
+            ).all()
+        )
+        if billing_ids:
+            query = query.where(Transaction.statement_id.in_(billing_ids))
+        else:
+            query = query.where(Transaction.date >= start, Transaction.date < end)
 
     txs = list(db.scalars(query).unique().all())
 

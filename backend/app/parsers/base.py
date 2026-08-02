@@ -89,12 +89,14 @@ def parse_br_date(raw: str, default_year: Optional[int] = None) -> Optional[date
 def parse_statement_text(text: str) -> ParsedStatement:
     from app.parsers.generic import parse_generic
     from app.parsers.inter import parse_inter
+    from app.parsers.itau import parse_itau
     from app.parsers.nubank import parse_nubank
 
     bank = detect_bank(text)
     parsers: dict[str, Callable[[str], ParsedStatement]] = {
         "nubank": parse_nubank,
         "inter": parse_inter,
+        "itau": parse_itau,
         "generic": parse_generic,
     }
     parser = parsers.get(bank, parse_generic)
