@@ -1,35 +1,78 @@
 # ExtratoAI
 
-Aplicação **local** para extrair faturas de cartão (PDF), categorizar gastos e visualizar um dashboard do mês.
+Aplicação **100% local** de finanças pessoais que transforma faturas de cartão de crédito (PDF) em um dashboard claro do mês: extrai lançamentos, categoriza gastos e permite exportar CSV — sem abrir vários apps de banco.
+
+## O problema
+
+Todo mês você baixa PDFs de faturas de bancos diferentes, tenta entender para onde foi o dinheiro e monta o fechamento na mão. O ExtratoAI automatiza essa leitura e centraliza a visão.
+
+## O que ele faz
+
+1. Recebe a fatura em PDF (upload no dashboard ou pasta `inbox` monitorada)
+2. Detecta o banco e extrai as transações
+3. Categoriza automaticamente (Alimentação, Assinaturas, Transporte, etc.)
+4. Mostra o **total a pagar da fatura** no mês de vencimento, com lançamentos e gráfico por categoria
+5. Permite corrigir categorias (e lembrar regras para próximas faturas)
+6. Exporta CSV do período
+
+## Bancos suportados
+
+| Banco | Status | Observação |
+|-------|--------|------------|
+| **Nubank** | Suportado | Parser dedicado |
+| **Banco Inter** | Suportado | Parser dedicado (layout `DD de mmm. AAAA`) |
+| **Itaú** | Suportado | Parser dedicado (visão por ciclo/vencimento da fatura) |
+| **Outros** | Fallback genérico | Pode funcionar parcialmente; resultados variam conforme o layout do PDF |
+| C6 | Detectado, sem parser dedicado | Cai no fallback genérico por enquanto |
+
+> PDFs escaneados (só imagem) ainda não são suportados — a fatura precisa ter texto selecionável.
 
 ## Stack
 
-- **Backend:** Python, FastAPI, SQLite, pdfplumber, watchdog
-- **Frontend:** Vite, React, TypeScript, Tailwind, Recharts
-- **Parsers MVP:** Nubank + Banco Inter + Itaú (+ fallback genérico)
-- **Export:** CSV
+| Camada | Tecnologia |
+|--------|------------|
+| Backend | Python 3.9+, FastAPI, SQLAlchemy, SQLite |
+| Extração de PDF | pdfplumber |
+| Monitoramento de pasta | watchdog |
+| Frontend | Vite, React, TypeScript, Tailwind CSS |
+| Gráficos | Recharts |
+| Exportação | CSV |
 
-## Como rodar
+Tudo roda na sua máquina. Não há cloud, login nem telemetria no MVP.
 
-### Backend
+## Como rodar localmente
+
+### Pré-requisitos
+
+- Python 3.9+
+- Node.js 18+ (recomendado)
+- macOS / Linux / Windows com terminal
+
+### 1. Backend
 
 ```bash
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-API: http://127.0.0.1:8000/docs
+- API / docs: http://127.0.0.1:8000/docs  
+- Health: http://127.0.0.1:8000/health  
 
-Pasta monitorada automaticamente:
+Pastas locais:
 
-`backend/data/inbox/`
+| Pasta | Uso |
+|-------|-----|
+| `backend/data/inbox/` | PDFs novos (monitorada automaticamente) |
+| `backend/data/uploads/` | Uploads feitos pela interface |
+| `backend/data/processed/` | PDFs já processados |
+| `backend/data/extratoai.db` | Banco SQLite |
 
-PDFs processados vão para `backend/data/processed/`.
+### 2. Frontend
 
-### Frontend
+Em outro terminal:
 
 ```bash
 cd frontend
@@ -37,9 +80,11 @@ npm install
 npm run dev
 ```
 
-Dashboard: http://127.0.0.1:5173
+Dashboard: http://localhost:5173
 
-### Testes
+O Vite faz proxy de `/api` para o backend na porta 8000.
+
+### 3. Testes (opcional)
 
 ```bash
 cd backend
@@ -47,33 +92,46 @@ source .venv/bin/activate
 pytest -q
 ```
 
-Fixtures de texto/PDF em `backend/tests/fixtures/`.
+Fixtures em `backend/tests/fixtures/`.
 
-## Fluxo
+## Fluxo de uso
 
-1. Arraste um PDF no dashboard **ou** copie para `backend/data/inbox/`
-2. O backend extrai o texto, detecta o banco, parseia transações e categoriza
-3. O dashboard atualiza totais, gráfico por categoria e lista editável
-4. Corrija categorias (opcionalmente cria regra de merchant)
-5. Exporte CSV do mês
+1. Abra o dashboard e importe um PDF de fatura (ou copie o arquivo para `backend/data/inbox/`)
+2. O sistema processa, categoriza e grava no SQLite
+3. Navegue até o **mês de vencimento** da fatura para ver o total a pagar e todos os lançamentos do ciclo
+4. Ajuste categorias se precisar (pode criar regra automática)
+5. Exporte CSV quando quiser analisar em planilha
 
-## Categorias seed
+Se tentar importar o mesmo PDF de novo, o app avisa que a fatura já existe (dedupe por hash do arquivo).
+
+## Categorias iniciais
 
 Alimentação, Assinaturas, Transporte, Moradia, Saúde, Lazer, Compras, Educação, Outros, Não categorizado.
 
-## Roadmap v1.1 — E-mail (IMAP)
+## Estrutura do repositório
 
-O pipeline de parsing permanece o mesmo. A próxima etapa só muda a **fonte do PDF**:
-
-1. Configurar credenciais IMAP (Gmail App Password / Outlook) em `.env`
-2. Worker periódico (`imaplib` ou `aioimaplib`) busca mensagens de remetentes conhecidos (`fatura@nubank.com.br`, etc.)
-3. Baixar anexos `.pdf` para `data/inbox/`
-4. O watcher existente processa normalmente
-
-Não entra no MVP atual: OAuth cloud, sync remoto, multi-usuário.
+```
+ExtratoAI/
+├── backend/          # FastAPI + parsers + SQLite
+│   ├── app/
+│   ├── data/         # inbox, uploads, processed, DB
+│   └── tests/
+├── frontend/         # React (Vite) + dashboard
+└── README.md
+```
 
 ## Privacidade
 
-Tudo roda na sua máquina. Sem telemetria. O banco é o arquivo SQLite em `backend/data/extratoai.db`.
+- Dados ficam só no seu computador (`extratoai.db` + PDFs locais)
+- Sem envio para servidores externos no fluxo padrão
+- Se o schema do banco mudar e o app falhar ao iniciar, apague `backend/data/extratoai.db` e reinicie o backend (as categorias seed são recriadas)
 
-Se o schema mudar e o app falhar ao iniciar, apague `backend/data/extratoai.db` e reinicie o backend (as categorias seed são recriadas automaticamente).
+## Roadmap
+
+**v1.1 — E-mail (IMAP)**  
+Buscar anexos de fatura no Gmail/Outlook e salvar em `inbox/` (o pipeline de parsing permanece o mesmo).
+
+**Depois**  
+Mais bancos/layouts, OCR para PDF escaneado, orçamento e alertas.
+
+Fora do MVP atual: Open Finance, app mobile, multi-usuário, sync na nuvem.
