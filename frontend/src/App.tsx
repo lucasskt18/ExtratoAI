@@ -92,14 +92,7 @@ function App() {
       </header>
 
       {error && (
-        <div
-          className="rise mt-4 rounded-[14px] border px-4 py-3 text-sm font-medium"
-          style={{
-            background: 'var(--color-danger-soft)',
-            borderColor: '#fecaca',
-            color: 'var(--color-danger)',
-          }}
-        >
+        <div className="banner-error rise mt-4">
           {error}. Verifique se o backend está em http://127.0.0.1:8000
         </div>
       )}
@@ -127,7 +120,7 @@ function App() {
           </div>
 
           <div className="mt-5">
-            <UploadZone inbox={inbox} onUploaded={refresh} compact />
+            <UploadZone inbox={inbox} onUploaded={refresh} />
           </div>
         </div>
 

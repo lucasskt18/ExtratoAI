@@ -82,10 +82,6 @@ export function fetchInbox() {
   return request<InboxStatus>('/statements/inbox')
 }
 
-export function fetchStatements() {
-  return request<Statement[]>('/statements')
-}
-
 export async function uploadPdf(file: File) {
   const form = new FormData()
   form.append('file', file)

@@ -25,7 +25,6 @@ class Transaction(Base):
     category_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("categories.id"), nullable=True
     )
-    fingerprint: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
 
     statement: Mapped[Statement] = relationship(back_populates="transactions")
     category: Mapped[Optional[Category]] = relationship(back_populates="transactions")

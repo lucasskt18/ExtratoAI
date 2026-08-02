@@ -3,25 +3,16 @@ from __future__ import annotations
 import re
 from datetime import date
 
-from app.parsers.base import ParsedStatement, ParsedTransaction, parse_br_date, parse_brl_amount
+from app.parsers.base import (
+    MONTH_MAP,
+    ParsedStatement,
+    ParsedTransaction,
+    parse_br_date,
+    parse_brl_amount,
+)
 
 # Nubank-style lines: DD MMM Description value
 # or DD/MM Description R$ value
-MONTH_MAP = {
-    "JAN": 1,
-    "FEV": 2,
-    "MAR": 3,
-    "ABR": 4,
-    "MAI": 5,
-    "JUN": 6,
-    "JUL": 7,
-    "AGO": 8,
-    "SET": 9,
-    "OUT": 10,
-    "NOV": 11,
-    "DEZ": 12,
-}
-
 LINE_DD_MMM = re.compile(
     r"^(\d{2})\s+([A-Z]{3})\s+(.+?)\s+(-?R?\$?\s*[\d.]+,\d{2})$",
     re.IGNORECASE,

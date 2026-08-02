@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
 from app.models.transaction import Transaction
+from app.services.dates import InvalidMonthFormatError, month_bounds
 
 router = APIRouter()
 
@@ -29,12 +29,9 @@ def export_csv(
 
     if month:
         try:
-            year_s, month_s = month.split("-")
-            year, mon = int(year_s), int(month_s)
-            start = date(year, mon, 1)
-            end = date(year + 1, 1, 1) if mon == 12 else date(year, mon + 1, 1)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail="Invalid month format") from exc
+            start, end = month_bounds(month)
+        except InvalidMonthFormatError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         query = query.where(Transaction.date >= start, Transaction.date < end)
 
     txs = list(db.scalars(query).unique().all())

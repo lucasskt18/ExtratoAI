@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import io
 import logging
 from pathlib import Path
 from typing import Optional, Tuple
@@ -27,10 +26,6 @@ def file_sha256(path: Path) -> str:
 
 def find_pdf_offset(data: bytes) -> int:
     return data.find(PDF_MAGIC)
-
-
-def is_pdf_bytes(data: bytes) -> bool:
-    return find_pdf_offset(data) >= 0
 
 
 def repair_pdf_file(path: Path) -> Tuple[bool, Optional[str]]:
@@ -101,29 +96,3 @@ def extract_text_from_pdf(path: Path) -> str:
             f"Detalhe: {exc}"
         ) from exc
     return "\n".join(parts).strip()
-
-
-def extract_text_from_bytes(data: bytes, filename: str = "upload.pdf") -> str:
-    offset = find_pdf_offset(data)
-    if offset < 0:
-        raise InvalidPdfError(
-            f"'{filename}' não parece um PDF válido. Baixe novamente a fatura do banco."
-        )
-    payload = data[offset:]
-    parts = []
-    try:
-        with pdfplumber.open(io.BytesIO(payload)) as pdf:
-            for page in pdf.pages:
-                text = page.extract_text() or ""
-                if text.strip():
-                    parts.append(text)
-    except Exception as exc:
-        raise InvalidPdfError(
-            f"Não foi possível ler '{filename}'. Detalhe: {exc}"
-        ) from exc
-    return "\n".join(parts).strip()
-
-
-def transaction_fingerprint(tx_date: str, description: str, amount: float) -> str:
-    raw = f"{tx_date}|{description.strip().lower()}|{amount:.2f}"
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()

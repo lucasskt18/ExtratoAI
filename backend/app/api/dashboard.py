@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import date
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
@@ -12,19 +12,9 @@ from app.db.session import get_db
 from app.models.category import Category
 from app.models.transaction import Transaction
 from app.schemas import CategoryBreakdown, DashboardSummary, TransactionOut
+from app.services.dates import InvalidMonthFormatError, month_bounds
 
 router = APIRouter()
-
-
-def _month_bounds(month: str) -> Tuple[date, date]:
-    try:
-        year_s, month_s = month.split("-")
-        year, mon = int(year_s), int(month_s)
-        start = date(year, mon, 1)
-        end = date(year + 1, 1, 1) if mon == 12 else date(year, mon + 1, 1)
-        return start, end
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Invalid month format") from exc
 
 
 @router.get("/dashboard", response_model=DashboardSummary)
@@ -35,7 +25,10 @@ def dashboard_summary(
     if not month:
         today = date.today()
         month = f"{today.year:04d}-{today.month:02d}"
-    start, end = _month_bounds(month)
+    try:
+        start, end = month_bounds(month)
+    except InvalidMonthFormatError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     txs = list(
         db.scalars(
@@ -62,7 +55,6 @@ def dashboard_summary(
     uncategorized_count = 0
     for tx in txs:
         amount = abs(tx.amount) if tx.amount > 0 else 0.0
-        # Credit card purchases are typically positive in our parsers
         if tx.amount <= 0:
             continue
         spent += amount

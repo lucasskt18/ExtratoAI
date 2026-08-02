@@ -13,12 +13,7 @@ from app.models.statement import Statement
 from app.models.transaction import Transaction
 from app.parsers import parse_statement_text
 from app.services.categorize import categorize_description
-from app.services.pdf import (
-    InvalidPdfError,
-    extract_text_from_pdf,
-    file_sha256,
-    transaction_fingerprint,
-)
+from app.services.pdf import InvalidPdfError, extract_text_from_pdf, file_sha256
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +53,6 @@ def process_pdf(
             source_filename=display_name,
             file_hash=file_hash,
             status="needs_review",
-            raw_text_preview="",
             total_amount=0.0,
         )
         db.add(statement)
@@ -79,7 +73,6 @@ def process_pdf(
         status="needs_review"
         if parsed.confidence < 0.5 or not parsed.transactions
         else "processed",
-        raw_text_preview=text[:2000],
     )
     db.add(statement)
     db.flush()
@@ -94,9 +87,6 @@ def process_pdf(
                 amount=tx.amount,
                 installment=tx.installment,
                 category_id=category_id,
-                fingerprint=transaction_fingerprint(
-                    tx.date.isoformat(), tx.description, tx.amount
-                ),
             )
         )
 

@@ -4,22 +4,13 @@ import re
 from datetime import date
 from typing import Optional
 
-from app.parsers.base import ParsedStatement, ParsedTransaction, parse_br_date, parse_brl_amount
-
-MONTH_MAP = {
-    "jan": 1,
-    "fev": 2,
-    "mar": 3,
-    "abr": 4,
-    "mai": 5,
-    "jun": 6,
-    "jul": 7,
-    "ago": 8,
-    "set": 9,
-    "out": 10,
-    "nov": 11,
-    "dez": 12,
-}
+from app.parsers.base import (
+    MONTH_MAP,
+    ParsedStatement,
+    ParsedTransaction,
+    parse_br_date,
+    parse_brl_amount,
+)
 
 # Real Inter statement lines:
 # 05 de abr. 2026 DROGARIA VIVA BEM CEN - R$ 41,95
@@ -51,7 +42,7 @@ DUE_RE = re.compile(r"(?:vencimento|data\s+de\s+vencimento)[^\d]*(\d{2}/\d{2}/\d
 
 
 def _parse_pt_date(day: str, month_token: str, year: str) -> Optional[date]:
-    month = MONTH_MAP.get(month_token.lower()[:3])
+    month = MONTH_MAP.get(month_token.upper()[:3])
     if not month:
         return None
     try:

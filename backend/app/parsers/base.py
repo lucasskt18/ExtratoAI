@@ -32,6 +32,22 @@ BANK_HINTS = [
     ("c6", ["c6 bank", "banco c6"]),
 ]
 
+# Portuguese month abbreviations (case-insensitive lookup via .upper())
+MONTH_MAP = {
+    "JAN": 1,
+    "FEV": 2,
+    "MAR": 3,
+    "ABR": 4,
+    "MAI": 5,
+    "JUN": 6,
+    "JUL": 7,
+    "AGO": 8,
+    "SET": 9,
+    "OUT": 10,
+    "NOV": 11,
+    "DEZ": 12,
+}
+
 
 def detect_bank(text: str) -> str:
     lowered = text.lower()

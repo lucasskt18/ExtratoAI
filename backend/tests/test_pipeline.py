@@ -9,7 +9,6 @@ from app.db.session import Base
 from app.models.category import Category
 from app.parsers import parse_statement_text
 from app.services.categorize import categorize_description
-from app.services.pdf import transaction_fingerprint
 
 
 @pytest.fixture()
@@ -38,12 +37,6 @@ def test_categorize_netflix(db_session):
     category = db_session.get(Category, cat_id)
     assert category is not None
     assert category.name == "Assinaturas"
-
-
-def test_fingerprint_stable():
-    a = transaction_fingerprint("2026-03-01", "IFOOD", 89.9)
-    b = transaction_fingerprint("2026-03-01", "ifood", 89.90)
-    assert a == b
 
 
 def test_parse_and_categorize_flow(db_session):

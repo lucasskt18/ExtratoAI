@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import date
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,6 +11,7 @@ from app.models.category import Category
 from app.models.transaction import Transaction
 from app.schemas import TransactionOut, TransactionUpdate
 from app.services.categorize import ensure_merchant_rule
+from app.services.dates import InvalidMonthFormatError, month_bounds
 
 router = APIRouter()
 
@@ -31,12 +31,9 @@ def list_transactions(
 
     if month:
         try:
-            year_s, month_s = month.split("-")
-            year, mon = int(year_s), int(month_s)
-            start = date(year, mon, 1)
-            end = date(year + 1, 1, 1) if mon == 12 else date(year, mon + 1, 1)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail="Invalid month format") from exc
+            start, end = month_bounds(month)
+        except InvalidMonthFormatError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         query = query.where(Transaction.date >= start, Transaction.date < end)
 
     if category_id is not None:

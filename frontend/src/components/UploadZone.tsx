@@ -5,10 +5,9 @@ import { uploadPdf, type InboxStatus } from '../api/client'
 type Props = {
   inbox: InboxStatus | null
   onUploaded: () => void
-  compact?: boolean
 }
 
-export function UploadZone({ inbox, onUploaded, compact = false }: Props) {
+export function UploadZone({ inbox, onUploaded }: Props) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -45,12 +44,7 @@ export function UploadZone({ inbox, onUploaded, compact = false }: Props) {
     <div>
       <div
         {...getRootProps()}
-        className={[
-          'dropzone',
-          isDragActive ? 'is-active' : '',
-          busy ? 'is-busy' : '',
-          compact ? '!py-4 !px-4' : '',
-        ].join(' ')}
+        className={['dropzone', isDragActive ? 'is-active' : '', busy ? 'is-busy' : ''].join(' ')}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -72,7 +66,7 @@ export function UploadZone({ inbox, onUploaded, compact = false }: Props) {
         </div>
 
         {inbox && (
-          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-teal-200/70 pt-3">
+          <div className="dropzone-meta">
             {inbox.pending_pdfs.length > 0 && (
               <span className="chip chip-warn">{inbox.pending_pdfs.length} pendente(s)</span>
             )}

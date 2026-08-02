@@ -75,3 +75,5 @@ Não entra no MVP atual: OAuth cloud, sync remoto, multi-usuário.
 ## Privacidade
 
 Tudo roda na sua máquina. Sem telemetria. O banco é o arquivo SQLite em `backend/data/extratoai.db`.
+
+Se o schema mudar e o app falhar ao iniciar, apague `backend/data/extratoai.db` e reinicie o backend (as categorias seed são recriadas automaticamente).
