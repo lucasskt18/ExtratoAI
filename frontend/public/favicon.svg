@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" rx="16" fill="#0F766E"/>
-  <path d="M20 44V20h14.8c6.4 0 10.4 3.3 10.4 8.4 0 5.2-4 8.6-10.6 8.6H26.8V44H20zm7.5-13.2h3.4c3 0 4.7-1.4 4.7-3.6s-1.7-3.5-4.7-3.5H27.5v7.1z" fill="#F0FDFA"/>
+  <rect width="64" height="64" rx="14" fill="#0F766E"/>
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="url(#g)"/>
+  <!-- stylized E / statement mark -->
+  <path
+    d="M18 18h28v6.5H26.5V29H42v6H26.5v4.5H46V46H18V18z"
+    fill="#F0FDFA"
+  />
+  <defs>
+    <linearGradient id="g" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
 </svg>

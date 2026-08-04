@@ -187,7 +187,7 @@ function App() {
       </section>
 
       <footer className="mt-8 text-center text-xs font-medium text-[var(--color-muted-2)]">
-        ExtratoAI · 100% local · seus dados ficam no seu Mac
+        ExtratoAI · 100% local
       </footer>
     </div>
   )
