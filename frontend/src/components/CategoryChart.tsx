@@ -1,4 +1,5 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { useState } from 'react'
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import type { CategoryBreakdown } from '../api/client'
 import { formatBRL } from '../lib/format'
 
@@ -9,6 +10,7 @@ type Props = {
 export function CategoryChart({ data }: Props) {
   const chartData = data.filter((d) => d.total > 0)
   const total = chartData.reduce((acc, item) => acc + item.total, 0)
+  const [active, setActive] = useState<CategoryBreakdown | null>(null)
 
   if (!chartData.length) {
     return (
@@ -17,6 +19,11 @@ export function CategoryChart({ data }: Props) {
       </div>
     )
   }
+
+  const centerLabel = active?.name ?? 'Total'
+  const centerValue = active ? active.total : total
+  const centerPct =
+    active && total > 0 ? Math.round((active.total / total) * 100) : null
 
   return (
     <div className="grid gap-4">
@@ -27,43 +34,62 @@ export function CategoryChart({ data }: Props) {
               data={chartData}
               dataKey="total"
               nameKey="name"
-              innerRadius={52}
+              innerRadius={58}
               outerRadius={78}
               paddingAngle={2}
               stroke="none"
               animationDuration={600}
+              onMouseEnter={(_, index) => setActive(chartData[index] ?? null)}
+              onMouseLeave={() => setActive(null)}
             >
               {chartData.map((entry) => (
-                <Cell key={`${entry.name}-${entry.category_id}`} fill={entry.color} />
+                <Cell
+                  key={`${entry.name}-${entry.category_id}`}
+                  fill={entry.color}
+                  stroke={
+                    active?.category_id === entry.category_id ? 'white' : 'none'
+                  }
+                  strokeWidth={active?.category_id === entry.category_id ? 2 : 0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                />
               ))}
             </Pie>
-            <Tooltip
-              formatter={(value) => formatBRL(Number(value))}
-              contentStyle={{
-                borderRadius: 12,
-                border: '1px solid var(--color-border)',
-                background: 'white',
-                fontSize: 13,
-                fontWeight: 600,
-              }}
-            />
           </PieChart>
         </ResponsiveContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--color-muted-2)]">
-            Total
-          </span>
-          <span className="mt-0.5 text-sm font-extrabold tabular-nums text-[var(--color-ink)]">
-            {formatBRL(total)}
-          </span>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="flex h-[6.5rem] w-[6.5rem] flex-col items-center justify-center overflow-hidden px-2 text-center">
+            <span
+              className={
+                active
+                  ? 'line-clamp-2 max-w-full text-[11px] font-semibold leading-tight text-[var(--color-muted)]'
+                  : 'text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--color-muted-2)]'
+              }
+            >
+              {centerLabel}
+            </span>
+            <span className="mt-1 text-sm font-extrabold leading-none tabular-nums text-[var(--color-ink)]">
+              {formatBRL(centerValue)}
+            </span>
+            {centerPct !== null && (
+              <span className="mt-1 text-[11px] font-bold leading-none tabular-nums text-[var(--color-muted)]">
+                {centerPct}%
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       <ul className="space-y-2.5">
         {chartData.slice(0, 6).map((entry) => {
           const pct = total > 0 ? Math.round((entry.total / total) * 100) : 0
+          const isActive = active?.category_id === entry.category_id
           return (
-            <li key={`${entry.name}-${entry.category_id}`}>
+            <li
+              key={`${entry.name}-${entry.category_id}`}
+              className={isActive ? 'opacity-100' : active ? 'opacity-55' : 'opacity-100'}
+              onMouseEnter={() => setActive(entry)}
+              onMouseLeave={() => setActive(null)}
+            >
               <div className="mb-1 flex items-center justify-between gap-3 text-sm">
                 <span className="flex min-w-0 items-center gap-2 font-semibold text-[var(--color-ink-2)]">
                   <span
