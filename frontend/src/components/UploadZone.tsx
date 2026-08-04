@@ -70,17 +70,9 @@ export function UploadZone({ inbox, onUploaded }: Props) {
           </span>
         </div>
 
-        {inbox && (
+        {inbox && inbox.pending_pdfs.length > 0 && (
           <div className="dropzone-meta">
-            {inbox.pending_pdfs.length > 0 && (
-              <span className="chip chip-warn">{inbox.pending_pdfs.length} pendente(s)</span>
-            )}
-            <span
-              className="truncate text-[11px] font-medium text-[var(--color-muted-2)]"
-              title={inbox.inbox_dir}
-            >
-              {inbox.inbox_dir}
-            </span>
+            <span className="chip chip-warn">{inbox.pending_pdfs.length} pendente(s)</span>
           </div>
         )}
       </div>
