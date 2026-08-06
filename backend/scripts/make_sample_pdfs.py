@@ -22,8 +22,8 @@ def make_pdf(text_path: Path, pdf_path: Path) -> None:
 
 
 def main() -> None:
-    make_pdf(FIXTURES / "nubank_sample.txt", FIXTURES / "nubank_sample.pdf")
-    make_pdf(FIXTURES / "inter_sample.txt", FIXTURES / "inter_sample.pdf")
+    for bank in ("nubank", "inter", "itau"):
+        make_pdf(FIXTURES / f"{bank}_sample.txt", FIXTURES / f"{bank}_sample.pdf")
     print("Wrote sample PDFs to", FIXTURES)
 
 

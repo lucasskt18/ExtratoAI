@@ -1,13 +1,10 @@
 export type Category = {
   id: number
   name: string
-  color: string
-  keywords: string
 }
 
 export type Transaction = {
   id: number
-  statement_id: number
   date: string
   description: string
   amount: number
@@ -21,14 +18,19 @@ export type CategoryBreakdown = {
   name: string
   color: string
   total: number
-  count: number
+}
+
+export type Statement = {
+  id: number
+  bank: string
+  card_label?: string | null
+  period_end?: string | null
+  source_filename: string
 }
 
 export type DashboardSummary = {
-  month: string
   total_spent: number
   charges_total: number
-  invoice_total?: number | null
   view_mode: 'calendar' | 'billing'
   transaction_count: number
   uncategorized_count: number
@@ -37,22 +39,7 @@ export type DashboardSummary = {
   statements: Statement[]
 }
 
-export type Statement = {
-  id: number
-  bank: string
-  card_label?: string | null
-  period_start?: string | null
-  period_end?: string | null
-  total_amount: number
-  source_filename: string
-  file_hash: string
-  status: string
-  created_at: string
-  transaction_count: number
-}
-
 export type InboxStatus = {
-  inbox_dir: string
   pending_pdfs: string[]
   processed_count: number
 }

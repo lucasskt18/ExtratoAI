@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.api.serializers import statement_out
 from app.db.session import get_db
 from app.models.category import Category
 from app.models.statement import Statement
@@ -16,22 +17,6 @@ from app.schemas import CategoryBreakdown, DashboardSummary, StatementOut, Trans
 from app.services.dates import InvalidMonthFormatError, month_bounds
 
 router = APIRouter()
-
-
-def _statement_out(stmt: Statement, count: int = 0) -> StatementOut:
-    return StatementOut(
-        id=stmt.id,
-        bank=stmt.bank,
-        card_label=stmt.card_label,
-        period_start=stmt.period_start,
-        period_end=stmt.period_end,
-        total_amount=stmt.total_amount,
-        source_filename=stmt.source_filename,
-        file_hash=stmt.file_hash,
-        status=stmt.status,
-        created_at=stmt.created_at,
-        transaction_count=count,
-    )
 
 
 def _build_breakdown(
@@ -116,7 +101,7 @@ def dashboard_summary(
         )
         for stmt in billing_statements:
             count = sum(1 for t in txs if t.statement_id == stmt.id)
-            statement_outs.append(_statement_out(stmt, count))
+            statement_outs.append(statement_out(stmt, count))
         invoice_total = round(sum(s.total_amount for s in billing_statements), 2)
     else:
         # Calendar fallback: only txs not already tied to a bill with a due date

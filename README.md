@@ -94,6 +94,21 @@ pytest -q
 
 Fixtures em `backend/tests/fixtures/`.
 
+Para regenerar os PDFs de amostra a partir dos `.txt`:
+
+```bash
+cd backend && source .venv/bin/activate
+python scripts/make_sample_pdfs.py
+```
+
+Atalhos na raiz do repo (com backend `.venv` e frontend instalados):
+
+```bash
+npm run dev:backend
+npm run dev:frontend
+npm test
+```
+
 ## Fluxo de uso
 
 1. Abra o dashboard e importe um PDF de fatura (ou copie o arquivo para `backend/data/inbox/`)
@@ -115,8 +130,10 @@ ExtratoAI/
 ├── backend/          # FastAPI + parsers + SQLite
 │   ├── app/
 │   ├── data/         # inbox, uploads, processed, DB
+│   ├── scripts/      # gera PDFs de fixture
 │   └── tests/
 ├── frontend/         # React (Vite) + dashboard
+├── package.json      # atalhos npm (dev/test)
 └── README.md
 ```
 

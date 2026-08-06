@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.api.serializers import statement_out
 from app.config import settings
 from app.db.session import get_db
 from app.models.statement import Statement
@@ -19,22 +20,6 @@ from app.services.pipeline import DuplicateStatementError, process_inbox, proces
 router = APIRouter()
 
 
-def _statement_out(stmt: Statement, count: int = 0) -> StatementOut:
-    return StatementOut(
-        id=stmt.id,
-        bank=stmt.bank,
-        card_label=stmt.card_label,
-        period_start=stmt.period_start,
-        period_end=stmt.period_end,
-        total_amount=stmt.total_amount,
-        source_filename=stmt.source_filename,
-        file_hash=stmt.file_hash,
-        status=stmt.status,
-        created_at=stmt.created_at,
-        transaction_count=count,
-    )
-
-
 @router.get("", response_model=List[StatementOut])
 def list_statements(db: Session = Depends(get_db)) -> List[StatementOut]:
     rows = db.execute(
@@ -43,7 +28,7 @@ def list_statements(db: Session = Depends(get_db)) -> List[StatementOut]:
         .group_by(Statement.id)
         .order_by(Statement.created_at.desc())
     ).all()
-    return [_statement_out(stmt, count) for stmt, count in rows]
+    return [statement_out(stmt, count) for stmt, count in rows]
 
 
 @router.get("/inbox", response_model=InboxStatus)
@@ -61,7 +46,7 @@ def inbox_status(db: Session = Depends(get_db)) -> InboxStatus:
 @router.post("/process-inbox", response_model=List[StatementOut])
 def process_inbox_endpoint(db: Session = Depends(get_db)) -> List[StatementOut]:
     statements = process_inbox(db)
-    return [_statement_out(s, len(s.transactions)) for s in statements]
+    return [statement_out(s, len(s.transactions)) for s in statements]
 
 
 @router.post("/upload", response_model=UploadResult)
@@ -108,7 +93,7 @@ async def upload_statement(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     return UploadResult(
-        statement=_statement_out(statement, len(statement.transactions)),
+        statement=statement_out(statement, len(statement.transactions)),
         message=message,
     )
 
@@ -122,7 +107,7 @@ def get_statement(statement_id: int, db: Session = Depends(get_db)) -> Statement
     )
     if not stmt:
         raise HTTPException(status_code=404, detail="Statement not found")
-    base = _statement_out(stmt, len(stmt.transactions))
+    base = statement_out(stmt, len(stmt.transactions))
     return StatementDetail(**base.model_dump(), transactions=stmt.transactions)
 
 

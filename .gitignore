@@ -2,8 +2,13 @@
 backend/.venv/
 backend/**/__pycache__/
 backend/.pytest_cache/
+backend/.ruff_cache/
 backend/*.egg-info/
 *.pyc
+
+# Editor
+.vscode/
+.idea/
 
 # Data / local DB
 backend/data/*.db
