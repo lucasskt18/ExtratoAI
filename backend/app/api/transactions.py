@@ -10,7 +10,7 @@ from app.db.session import get_db
 from app.models.category import Category
 from app.models.transaction import Transaction
 from app.schemas import TransactionOut, TransactionUpdate
-from app.services.categorize import ensure_merchant_rule
+from app.services.categorize import extract_merchant_pattern, ensure_merchant_rule
 from app.services.dates import InvalidMonthFormatError, month_bounds
 
 router = APIRouter()
@@ -75,7 +75,7 @@ def update_transaction(
         tx.category_id = payload.category_id
 
         if payload.remember_rule:
-            pattern = payload.rule_pattern or tx.description.split()[0]
+            pattern = payload.rule_pattern or extract_merchant_pattern(tx.description)
             ensure_merchant_rule(db, pattern, payload.category_id)
 
     db.commit()

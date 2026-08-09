@@ -1,9 +1,11 @@
 from pathlib import Path
 
+from app.parsers.base import detect_bank, parse_statement_text
+from app.parsers.c6 import parse_c6
 from app.parsers.inter import parse_inter
 from app.parsers.itau import parse_itau
 from app.parsers.nubank import parse_nubank
-from app.parsers.base import detect_bank, parse_statement_text
+from app.services.categorize import extract_merchant_pattern
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -21,6 +23,11 @@ def test_detect_inter():
 def test_detect_itau():
     text = (FIXTURES / "itau_sample.txt").read_text(encoding="utf-8")
     assert detect_bank(text) == "itau"
+
+
+def test_detect_c6():
+    text = (FIXTURES / "c6_sample.txt").read_text(encoding="utf-8")
+    assert detect_bank(text) == "c6"
 
 
 def test_parse_nubank_transactions():
@@ -67,6 +74,16 @@ def test_parse_itau_transactions():
     assert "padaria" in descriptions
 
 
+def test_parse_c6_transactions():
+    text = (FIXTURES / "c6_sample.txt").read_text(encoding="utf-8")
+    result = parse_c6(text)
+    assert result.bank == "c6"
+    assert len(result.transactions) >= 7
+    assert result.total_amount == 456.78
+    assert any(t.installment == "1/3" for t in result.transactions)
+    assert not any("pagamento recebido" in t.description.lower() for t in result.transactions)
+
+
 def test_parse_statement_text_routes_itau():
     text = (FIXTURES / "itau_sample.txt").read_text(encoding="utf-8")
     result = parse_statement_text(text)
@@ -79,3 +96,17 @@ def test_parse_statement_text_routes():
     result = parse_statement_text(text)
     assert result.bank == "nubank"
     assert result.transactions
+
+
+def test_parse_statement_text_routes_c6():
+    text = (FIXTURES / "c6_sample.txt").read_text(encoding="utf-8")
+    result = parse_statement_text(text)
+    assert result.bank == "c6"
+    assert result.transactions
+
+
+def test_merchant_pattern_normalizes_common_descriptors():
+    assert extract_merchant_pattern("IFOOD *IFOOD CLUBE") == "ifood"
+    assert extract_merchant_pattern("Uber Trip Sao Paulo") == "uber"
+    assert extract_merchant_pattern("Amazon Marketplace 123") == "amazon"
+    assert extract_merchant_pattern("NETFLIX.COM") == "netflix"

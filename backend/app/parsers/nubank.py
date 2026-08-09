@@ -69,11 +69,27 @@ def parse_nubank(text: str) -> ParsedStatement:
 
         # Skip payment/credit summary lines often present in Nubank PDFs
         lowered = description.lower()
-        if any(k in lowered for k in ("pagamento recebido", "saldo anterior", "limite total")):
+        if any(
+            k in lowered
+            for k in (
+                "pagamento recebido",
+                "saldo anterior",
+                "limite total",
+                "fatura anterior",
+                "valor total",
+            )
+        ):
             continue
 
         installment_match = INSTALLMENT_RE.search(description)
         installment = installment_match.group(1) if installment_match else None
+
+        # Payments/credits appear as negative on the statement
+        if "pagamento" in lowered or amount < 0:
+            amount = -abs(amount)
+        else:
+            amount = abs(amount)
+
         key = (tx_date, description.lower(), round(amount, 2))
         if key in seen:
             continue

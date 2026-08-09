@@ -328,6 +328,16 @@ input {
   font-weight: 500;
 }
 
+.banner-warn {
+  border-radius: 14px;
+  border: 1px solid var(--color-warn-border);
+  background: var(--color-warn-soft);
+  color: var(--color-warn);
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
