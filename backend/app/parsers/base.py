@@ -87,6 +87,7 @@ def parse_br_date(raw: str, default_year: Optional[int] = None) -> Optional[date
 
 
 def parse_statement_text(text: str) -> ParsedStatement:
+    from app.parsers.c6 import parse_c6
     from app.parsers.generic import parse_generic
     from app.parsers.inter import parse_inter
     from app.parsers.itau import parse_itau
@@ -97,6 +98,7 @@ def parse_statement_text(text: str) -> ParsedStatement:
         "nubank": parse_nubank,
         "inter": parse_inter,
         "itau": parse_itau,
+        "c6": parse_c6,
         "generic": parse_generic,
     }
     parser = parsers.get(bank, parse_generic)

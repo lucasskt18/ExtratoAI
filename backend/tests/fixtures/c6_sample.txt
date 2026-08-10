@@ -1,0 +1,16 @@
+C6 Bank
+Banco C6 S.A.
+Fatura do cartão de crédito
+Período 01/03/2026 a 31/03/2026
+Vencimento 10/04/2026
+Total da fatura R$ 456,78
+
+05/03/2026 IFOOD *IFOOD CLUBE 45,90
+08/03/2026 Uber Trip 22,40
+12/03/2026 NETFLIX.COM 55,90
+15/03/2026 Amazon Marketplace 120,00
+18/03/2026 Pagamento recebido -200,00
+20/03/2026 Spotfy Premium 21,90
+22/03/2026 Farmácia Drogasil 38,50
+25/03/2026 Shell Box 89,00
+28/03/2026 Magazine Luiza Parcela 1/3 63,18

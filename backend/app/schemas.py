@@ -103,3 +103,19 @@ class InboxStatus(BaseModel):
     inbox_dir: str
     pending_pdfs: list[str]
     processed_count: int
+
+
+class ReviewQueueOut(BaseModel):
+    statements_needs_review: list[StatementOut] = Field(default_factory=list)
+    uncategorized_transactions: list[TransactionOut] = Field(default_factory=list)
+    needs_review_count: int = 0
+    uncategorized_count: int = 0
+
+
+class RecategorizeResult(BaseModel):
+    updated: int
+
+
+class MerchantRuleUpdate(BaseModel):
+    pattern: Optional[str] = None
+    category_id: Optional[int] = None

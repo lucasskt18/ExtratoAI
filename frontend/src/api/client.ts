@@ -1,10 +1,19 @@
 export type Category = {
   id: number
   name: string
+  color?: string
+  keywords?: string
+}
+
+export type MerchantRule = {
+  id: number
+  pattern: string
+  category_id: number
 }
 
 export type Transaction = {
   id: number
+  statement_id?: number
   date: string
   description: string
   amount: number
@@ -26,6 +35,8 @@ export type Statement = {
   card_label?: string | null
   period_end?: string | null
   source_filename: string
+  status?: string
+  transaction_count?: number
 }
 
 export type DashboardSummary = {
@@ -42,6 +53,13 @@ export type DashboardSummary = {
 export type InboxStatus = {
   pending_pdfs: string[]
   processed_count: number
+}
+
+export type ReviewQueue = {
+  statements_needs_review: Statement[]
+  uncategorized_transactions: Transaction[]
+  needs_review_count: number
+  uncategorized_count: number
 }
 
 const API = '/api'
@@ -73,6 +91,14 @@ export function fetchInbox() {
   return request<InboxStatus>('/statements/inbox')
 }
 
+export function fetchReviewQueue() {
+  return request<ReviewQueue>('/review')
+}
+
+export function fetchMerchantRules() {
+  return request<MerchantRule[]>('/categories/rules')
+}
+
 export async function uploadPdf(file: File) {
   const form = new FormData()
   form.append('file', file)
@@ -91,6 +117,38 @@ export function updateTransaction(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
+}
+
+export function updateCategory(id: number, payload: { keywords?: string; name?: string; color?: string }) {
+  return request<Category>(`/categories/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function createMerchantRule(pattern: string, categoryId: number) {
+  return request<MerchantRule>('/categories/rules', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pattern, category_id: categoryId }),
+  })
+}
+
+export function deleteMerchantRule(id: number) {
+  return request<{ status: string }>(`/categories/rules/${id}`, { method: 'DELETE' })
+}
+
+export function markStatementReviewed(id: number) {
+  return request<Statement>(`/review/statements/${id}/mark-reviewed`, { method: 'POST' })
+}
+
+export function deleteStatement(id: number) {
+  return request<{ status: string }>(`/statements/${id}`, { method: 'DELETE' })
+}
+
+export function recategorizeUncategorized() {
+  return request<{ updated: number }>('/categories/recategorize', { method: 'POST' })
 }
 
 export function exportCsvUrl(month: string) {

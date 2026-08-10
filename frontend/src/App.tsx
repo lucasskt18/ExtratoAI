@@ -1,15 +1,27 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
+  createMerchantRule,
+  deleteMerchantRule,
+  deleteStatement,
   exportCsvUrl,
   fetchCategories,
   fetchDashboard,
   fetchInbox,
+  fetchMerchantRules,
+  fetchReviewQueue,
+  markStatementReviewed,
+  recategorizeUncategorized,
+  updateCategory,
   updateTransaction,
   type Category,
   type DashboardSummary,
   type InboxStatus,
+  type MerchantRule,
+  type ReviewQueue,
 } from './api/client'
 import { CategoryChart } from './components/CategoryChart'
+import { ReviewQueuePanel } from './components/ReviewQueuePanel'
+import { RulesPanel } from './components/RulesPanel'
 import { TransactionList } from './components/TransactionList'
 import { UploadZone } from './components/UploadZone'
 import { currentMonth, formatBRL, monthLabel, shiftMonth } from './lib/format'
@@ -18,6 +30,8 @@ function App() {
   const [month, setMonth] = useState(currentMonth)
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [rules, setRules] = useState<MerchantRule[]>([])
+  const [review, setReview] = useState<ReviewQueue | null>(null)
   const [inbox, setInbox] = useState<InboxStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -26,14 +40,18 @@ function App() {
     setLoading(true)
     setError(null)
     try {
-      const [dash, cats, inboxStatus] = await Promise.all([
+      const [dash, cats, inboxStatus, reviewQueue, merchantRules] = await Promise.all([
         fetchDashboard(month),
         fetchCategories(),
         fetchInbox(),
+        fetchReviewQueue(),
+        fetchMerchantRules(),
       ])
       setSummary(dash)
       setCategories(cats)
       setInbox(inboxStatus)
+      setReview(reviewQueue)
+      setRules(merchantRules)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
     } finally {
@@ -45,22 +63,21 @@ function App() {
     void refresh()
     const id = window.setInterval(() => {
       void fetchInbox().then(setInbox).catch(() => undefined)
+      void fetchReviewQueue().then(setReview).catch(() => undefined)
     }, 8000)
     return () => window.clearInterval(id)
   }, [refresh])
 
   async function handleCategoryChange(txId: number, categoryId: number, remember: boolean) {
-    const tx = summary?.recent_transactions.find((t) => t.id === txId)
-    const pattern = tx?.description.split(/\s+/)[0]
     await updateTransaction(txId, {
       category_id: categoryId,
       remember_rule: remember,
-      rule_pattern: pattern,
     })
     await refresh()
   }
 
   const uncategorized = summary?.uncategorized_count ?? 0
+  const reviewPending = (review?.needs_review_count ?? 0) + (review?.uncategorized_count ?? 0)
 
   return (
     <div className="app-shell">
@@ -94,6 +111,12 @@ function App() {
       {error && (
         <div className="banner-error rise mt-4">
           {error}. Verifique se o backend está em http://127.0.0.1:8000
+        </div>
+      )}
+
+      {reviewPending > 0 && (
+        <div className="banner-warn rise mt-4">
+          {reviewPending} item(ns) na fila de revisão — confira abaixo.
         </div>
       )}
 
@@ -162,6 +185,41 @@ function App() {
           </div>
         </div>
       </section>
+
+      <ReviewQueuePanel
+        review={review}
+        categories={categories}
+        onCategoryChange={(id, cat, remember) => {
+          void handleCategoryChange(id, cat, remember)
+        }}
+        onMarkReviewed={(id) => {
+          void markStatementReviewed(id).then(() => refresh())
+        }}
+        onDeleteStatement={(id) => {
+          if (!window.confirm('Apagar esta fatura e seus lançamentos?')) return
+          void deleteStatement(id).then(() => refresh())
+        }}
+        onRecategorize={() => {
+          void recategorizeUncategorized().then(() => refresh())
+        }}
+      />
+
+      <RulesPanel
+        categories={categories}
+        rules={rules}
+        onUpdateCategory={async (id, keywords) => {
+          await updateCategory(id, { keywords })
+          await refresh()
+        }}
+        onCreateRule={async (pattern, categoryId) => {
+          await createMerchantRule(pattern, categoryId)
+          await refresh()
+        }}
+        onDeleteRule={async (id) => {
+          await deleteMerchantRule(id)
+          await refresh()
+        }}
+      />
 
       <section className="panel panel-pad rise-3 mt-4">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

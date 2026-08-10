@@ -13,7 +13,8 @@ Todo mês você baixa PDFs de faturas de bancos diferentes, tenta entender para 
 3. Categoriza automaticamente (Alimentação, Assinaturas, Transporte, etc.)
 4. Mostra o **total a pagar da fatura** no mês de vencimento, com lançamentos e gráfico por categoria
 5. Permite corrigir categorias (e lembrar regras para próximas faturas)
-6. Exporta CSV do período
+6. Mostra uma **fila de revisão** para faturas `needs_review` e lançamentos sem categoria
+7. Exporta CSV do período
 
 ## Bancos suportados
 
@@ -22,8 +23,8 @@ Todo mês você baixa PDFs de faturas de bancos diferentes, tenta entender para 
 | **Nubank** | Suportado | Parser dedicado |
 | **Banco Inter** | Suportado | Parser dedicado (layout `DD de mmm. AAAA`) |
 | **Itaú** | Suportado | Parser dedicado (visão por ciclo/vencimento da fatura) |
+| **C6 Bank** | Suportado | Parser dedicado |
 | **Outros** | Fallback genérico | Pode funcionar parcialmente; resultados variam conforme o layout do PDF |
-| C6 | Detectado, sem parser dedicado | Cai no fallback genérico por enquanto |
 
 > PDFs escaneados (só imagem) ainda não são suportados — a fatura precisa ter texto selecionável.
 
@@ -31,7 +32,7 @@ Todo mês você baixa PDFs de faturas de bancos diferentes, tenta entender para 
 
 | Camada | Tecnologia |
 |--------|------------|
-| Backend | Python 3.9+, FastAPI, SQLAlchemy, SQLite |
+| Backend | Python 3.9+, FastAPI, SQLAlchemy, Alembic, SQLite |
 | Extração de PDF | pdfplumber |
 | Monitoramento de pasta | watchdog |
 | Frontend | Vite, React, TypeScript, Tailwind CSS |
@@ -141,7 +142,7 @@ ExtratoAI/
 
 - Dados ficam só no seu computador (`extratoai.db` + PDFs locais)
 - Sem envio para servidores externos no fluxo padrão
-- Se o schema do banco mudar e o app falhar ao iniciar, apague `backend/data/extratoai.db` e reinicie o backend (as categorias seed são recriadas)
+- O schema do banco é versionado com Alembic; ao subir o backend as migrações rodam automaticamente. Só apague `backend/data/extratoai.db` se quiser zerar os dados (as categorias seed são recriadas)
 
 ## Roadmap
 
